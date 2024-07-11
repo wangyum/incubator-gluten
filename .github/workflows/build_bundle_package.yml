@@ -28,7 +28,7 @@ on:
       os:
         description: 'OS version: ubuntu:20.04, ubuntu:22.04, centos:7 or centos:8'
         required: true
-        default: 'ubuntu:20.04'
+        default: 'ubuntu:22.04'
       spark:
         description: 'Spark version: spark-3.2, spark-3.3, spark-3.4 or spark-3.5'
         required: true
@@ -46,6 +46,16 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build Gluten velox third party
         run: |
+          yum update -y && yum install -y java-1.8.0-openjdk-devel wget
+          export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
+          
+          echo "JAVA_HOME: $JAVA_HOME"
+
+          wget https://archive.apache.org/dist/hadoop/core/hadoop-2.10.1/hadoop-2.10.1.tar.gz
+          tar xf hadoop-2.10.1.tar.gz -C /usr/local/
+          export HADOOP_HOME='/usr/local/hadoop-2.10.1'
+          echo "HADOOP_HOME: $HADOOP_HOME"
+
           yum install sudo patch java-1.8.0-openjdk-devel -y && \
           cd $GITHUB_WORKSPACE/ep/build-velox/src && \
           ./get_velox.sh && \
