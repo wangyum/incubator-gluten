@@ -32,6 +32,7 @@ import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 import org.apache.hadoop.hive.ql.metadata.{Partition => HivePartition}
 import org.apache.hadoop.io.compress.CompressionCodecFactory
 import org.apache.hadoop.mapred.FileInputFormat
+import org.apache.spark.sql.execution.PartitionedFileUtil
 
 import java.net.URI
 
@@ -135,18 +136,15 @@ class HivePartitionConverter(hadoopConf: Configuration, session: SparkSession)
     val maxSplitBytes = FilePartition.maxSplitBytes(session, selectedPartitions)
     val splitFiles = selectedPartitions.flatMap {
       partition =>
-        SparkShimLoader.getSparkShims
-          .getFileStatus(partition)
+        partition.files
           .flatMap {
             f =>
-              SparkShimLoader.getSparkShims.splitFiles(
+              PartitionedFileUtil.splitFiles(
                 session,
                 f,
-                f.getPath,
-                isSplitable = canBeSplit(f.getPath),
+                canBeSplit(f.path),
                 maxSplitBytes,
-                partition.values
-              )
+                partition.values)
           }
           .sortBy(_.length)(implicitly[Ordering[Long]].reverse)
     }
