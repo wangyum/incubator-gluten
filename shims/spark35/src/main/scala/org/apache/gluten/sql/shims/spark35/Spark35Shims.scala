@@ -405,12 +405,7 @@ class Spark35Shims extends SparkShims {
       isSplitable: Boolean,
       maxSplitBytes: Long,
       partitionValues: InternalRow): Seq[PartitionedFile] = {
-    PartitionedFileUtil.splitFiles(
-      sparkSession,
-      file,
-      isSplitable,
-      maxSplitBytes,
-      partitionValues)
+    PartitionedFileUtil.splitFiles(sparkSession, file, isSplitable, maxSplitBytes, partitionValues)
   }
 
   def structFromAttributes(attrs: Seq[Attribute]): StructType = {
