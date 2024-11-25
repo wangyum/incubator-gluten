@@ -22,7 +22,6 @@ import org.apache.gluten.extension.GlutenPlan
 import org.apache.gluten.extension.columnar.transition.Convention.{KnownRowType, RowType}
 import org.apache.gluten.extension.columnar.transition.ConventionReq
 import org.apache.gluten.extension.columnar.transition.ConventionReq.KnownChildrenConventions
-import org.apache.gluten.sql.shims.SparkShimLoader
 
 import org.apache.spark.TaskContext
 import org.apache.spark.internal.io.FileCommitProtocol
