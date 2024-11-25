@@ -24,11 +24,11 @@ jobs:
         env:
           SUPER_SECRET: ${{ secrets.EBAY_TOKEN }}
         run: |
-          git clone https://yumwang:${{ secrets.EBAY_TOKEN }}@github.corp.ebay.com/yumwang/packages.git
+          git clone https://wangyum:${{ secrets.EBAY_TOKEN }}@github.com/wangyum/packages.git
           mkdir -p /root/.m2/repository/ && mv packages/* /root/.m2/repository/
       - name: Build Spark
         run: |
-         git clone -b gluten-build https://yumwang:${{ secrets.EBAY_TOKEN }}@github.corp.ebay.com/carmel/ebay-spark.git
+         git clone -b gluten-build https://wangyum:${{ secrets.EBAY_TOKEN }}@github.com/wangyum/ebay-spark.git
       - name: Build Gluten velox third party
         run: |
           git clone -b ebay-build https://github.com/wangyum/incubator-gluten.git
