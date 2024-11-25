@@ -20,10 +20,10 @@ jobs:
     runs-on: ubuntu-20.04
     container: apache/gluten:vcpkg-centos-7
     steps:
-#      - name: Install packages
-#        run: |
-#          git clone https://wangyum:${{ secrets.GITHUB_TOKEN }}@github.com/wangyum/packages.git
-#          mkdir -p /root/.m2/repository/ && mv packages/* /root/.m2/repository/
+      - name: Install packages
+        run: |
+          git clone https://wangyum:${{ secrets.GITHUB_TOKEN }}@github.com/wangyum/packages.git
+          mkdir -p /root/.m2/repository/ && mv packages/* /root/.m2/repository/
       - name: Build Spark
         run: |
           git clone -b gluten-build https://wangyum:${{ secrets.GITHUB_TOKEN }}@github.com/wangyum/ebay-spark.git
