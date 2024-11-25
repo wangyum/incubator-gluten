@@ -100,8 +100,8 @@ abstract class ColumnarWriteFilesExec protected (
     }.toMap
     val numShufflePartitions = rddWithNonEmptyPartitions.partitions.length
     val maxDynamicPartitionsPerTask = session.sessionState.conf.maxDynamicPartitionsPerTask
-    val maxCreatedFilesInDynamicPartition = session.sessionState.conf
-      .maxCreatedFilesInDynamicPartition.toInt
+    val maxCreatedFilesInDynamicPartition =
+      session.sessionState.conf.maxCreatedFilesInDynamicPartition.toInt
 
     rddWithNonEmptyPartitions.mapPartitionsInternal {
       iterator =>
@@ -120,7 +120,8 @@ abstract class ColumnarWriteFilesExec protected (
           coalescedPartitionsNum,
           numShufflePartitions,
           maxDynamicPartitionsPerTask,
-          maxCreatedFilesInDynamicPartition)
+          maxCreatedFilesInDynamicPartition
+        )
         Iterator(ret)
     }
   }
