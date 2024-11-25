@@ -23,7 +23,7 @@ jobs:
       - name: Install packages
         run: |
           git clone https://wangyum:${{ secrets.GITHUB_TOKEN }}@github.com/wangyum/packages.git
-          mkdir -p /root/.m2/repository/ && mv packages/* /root/.m2/repository/
+          mkdir -p /root/.m2/repository/ && rm -rf /root/.m2/repository/io && rm -rf /root/.m2/repository/org && mv packages/* /root/.m2/repository/
       - name: Build Spark
         run: |
           git clone -b gluten-build https://wangyum:${{ secrets.GITHUB_TOKEN }}@github.com/wangyum/ebay-spark.git
