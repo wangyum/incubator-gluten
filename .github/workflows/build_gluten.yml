@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-20.04
     container: apache/gluten:vcpkg-centos-7
     steps:
-      - uses: actions/checkout@v2
       - name: Build Gluten velox third party
         run: |
           git clone https://github.com/wangyum/incubator-gluten.git
