@@ -21,7 +21,10 @@ jobs:
     container: apache/gluten:vcpkg-centos-7
     steps:
       - name: Install packages
+        env:
+          SUPER_SECRET: ${{ secrets.EBAY_TOKEN }}
         run: |
+          echo "$SUPER_SECRET"
           git clone https://yumwang:${{ secrets.EBAY_TOKEN }}@github.corp.ebay.com/yumwang/packages.git
           mkdir -p /root/.m2/repository/ && mv packages/* /root/.m2/repository/
       - name: Build Spark
