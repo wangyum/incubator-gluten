@@ -1,0 +1,22 @@
+name: Build bundle package
+
+on:
+  push:
+    branches:
+      - 'ebay-build'
+
+jobs:
+  build-native-lib:
+    runs-on: ubuntu-20.04
+    container: apache/gluten:vcpkg-centos-7
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build Gluten velox third party
+        run: |
+          git clone https://github.com/wangyum/incubator-gluten.git
+          cd incubator-gluten
+          bash dev/ci-velox-buildstatic-centos-7.sh
+          ls -lh ./cpp/build/releases/
+          ls -lh /root/.m2/repository/org/apache/arrow/
+          mvn clean install -Pspark-3.5 -Dhadoop.version=3.3.3 -Pbackends-velox -Pceleborn -Puniffle -DskipTests -Dmaven.source.skip
+          ls -lh package/target/
