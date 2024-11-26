@@ -22,7 +22,6 @@ import org.apache.gluten.extension.GlutenPlan
 import org.apache.gluten.extension.columnar.transition.Convention.{KnownRowType, RowType}
 import org.apache.gluten.extension.columnar.transition.ConventionReq
 import org.apache.gluten.extension.columnar.transition.ConventionReq.KnownChildrenConventions
-import org.apache.gluten.sql.shims.SparkShimLoader
 
 import org.apache.spark.TaskContext
 import org.apache.spark.internal.io.FileCommitProtocol
@@ -87,22 +86,40 @@ abstract class ColumnarWriteFilesExec protected (
   protected def writeFilesForEmptyRDD(
       description: WriteJobDescription,
       committer: FileCommitProtocol,
-      jobTrackerID: String): RDD[WriterCommitMessage] = {
+      jobTrackerID: String,
+      writeFilesSpec: WriteFilesSpec): RDD[WriterCommitMessage] = {
     val rddWithNonEmptyPartitions = session.sparkContext.parallelize(Seq.empty[InternalRow], 1)
+    val concurrentOutputWriterSpec = writeFilesSpec.concurrentOutputWriterSpecFunc(child)
+    val coalescedPartitionsNum = rddWithNonEmptyPartitions.partitions.flatMap {
+      case ShuffledRowRDDPartition(index, spec: CoalescedPartitionSpec) =>
+        val coalescedNum =
+          spec.endReducerIndex - spec.startReducerIndex
+        if (coalescedNum > 1) Some((index, coalescedNum)) else None
+      case p => None
+    }.toMap
+    val numShufflePartitions = rddWithNonEmptyPartitions.partitions.length
+    val maxDynamicPartitionsPerTask = session.sessionState.conf.maxDynamicPartitionsPerTask
+    val maxCreatedFilesInDynamicPartition =
+      session.sessionState.conf.maxCreatedFilesInDynamicPartition.toInt
+
     rddWithNonEmptyPartitions.mapPartitionsInternal {
       iterator =>
         val sparkStageId = TaskContext.get().stageId()
         val sparkPartitionId = TaskContext.get().partitionId()
         val sparkAttemptNumber = TaskContext.get().taskAttemptId().toInt & Int.MaxValue
-
-        val ret = SparkShimLoader.getSparkShims.writeFilesExecuteTask(
+        val ret = FileFormatWriter.executeTask(
           description,
           jobTrackerID,
           sparkStageId,
           sparkPartitionId,
           sparkAttemptNumber,
           committer,
-          iterator
+          iterator,
+          concurrentOutputWriterSpec,
+          coalescedPartitionsNum,
+          numShufflePartitions,
+          maxDynamicPartitionsPerTask,
+          maxCreatedFilesInDynamicPartition
         )
         Iterator(ret)
     }

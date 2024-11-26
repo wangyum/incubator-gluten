@@ -1,0 +1,47 @@
+name: Build ebay bundle package
+
+on:
+  push:
+    branches:
+      - 'ebay-build'
+
+jobs:
+  build-native-lib:
+    runs-on: ubuntu-20.04
+    container: apache/gluten:vcpkg-centos-7
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          repository: wangyum/packages
+          ref: main
+          token: ${{ secrets.EBAY_TOKEN }}
+      - name: Install packages to .m2/repository
+        run: |
+          mkdir -p ~/.m2/repository/
+          rm -rf ~/.m2/repository/io && rm -rf ~/.m2/repository/org
+          mv ../packages/* ~/.m2/repository/
+          cd ~/.m2 && find . -name "_*.repositories" | xargs rm -rf # Fix Could not find artifact io.ebay.rheos ...
+      - uses: actions/checkout@v1
+        with:
+          repository: wangyum/ebay-spark
+          ref: gluten-build
+          token: ${{ secrets.EBAY_TOKEN }}
+      - name: Install ebay-spark to .m2/repository
+        run: |
+          cd ../ebay-spark && mvn clean install -DskipTests=true
+      - name: Build Gluten velox third party
+        run: |
+          git clone -b ebay-build https://github.com/wangyum/incubator-gluten.git
+          cd incubator-gluten
+          bash dev/ci-velox-buildstatic-centos-7.sh
+          ls -lh ./cpp/build/releases/
+          ls -lhR ~/.m2/repository/org/apache/arrow/
+          mvn clean install -Pspark-3.5 -Dhadoop.version=3.3.3 -Pbackends-velox -Pceleborn -Puniffle -DskipTests -Dmaven.source.skip
+          ls -lh package/target/
+      - name: Upload bundle package
+        uses: actions/upload-artifact@v3
+        with:
+          name: gluten-velox-bundle-package
+          path: package/target/gluten-velox-bundle-*.jar
+          retention-days: 7
+          if-no-files-found: error
