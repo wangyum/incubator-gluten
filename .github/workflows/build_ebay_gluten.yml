@@ -20,6 +20,7 @@ jobs:
           mkdir -p ~/.m2/repository/
           rm -rf ~/.m2/repository/io && rm -rf ~/.m2/repository/org
           mv ../packages/* ~/.m2/repository/
+          ls ~/.m2/repository/io/ebay/rheos/rheos-client_JDK-1.8/2.0.11/
           cd ~/.m2 && find . -name "_*.repositories" | xargs rm -rf # Fix Could not find artifact io.ebay.rheos ...
       - uses: actions/checkout@v1
         with:
@@ -28,6 +29,7 @@ jobs:
           token: ${{ secrets.EBAY_TOKEN }}
       - name: Install ebay-spark to .m2/repository
         run: |
+          ls -l ~/.m2/repository/io/ebay/rheos/rheos-client_JDK-1.8/2.0.11/
           cd ../ebay-spark && mvn clean install -DskipTests=true
       - name: Build Gluten velox third party
         run: |
