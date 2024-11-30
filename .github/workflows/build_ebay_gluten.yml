@@ -31,14 +31,14 @@ jobs:
           token: ${{ secrets.EBAY_TOKEN }}
       - name: Install ebay-spark to $M2_REPOSITORY
         run: |
-          cd ../ebay-spark && build/mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -Dmaven.scaladoc.skip=true -Dmaven.source.skip -Dcyclonedx.skip=true
+          cd ../ebay-spark && build/mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true
       - name: Build Gluten velox third party
         run: |
           git clone -b ebay-build2 https://github.com/wangyum/incubator-gluten.git
           cd incubator-gluten
           bash dev/ci-velox-buildstatic-centos-7.sh
           ls -lh ./cpp/build/releases/
-          mvn clean install -Pspark-3.5 -Dhadoop.version=3.3.3 -Pbackends-velox -Pceleborn -Puniffle -DskipTests -Dmaven.source.skip
+          mvn clean install -Pspark-3.5 -Dhadoop.version=3.3.3 -Pbackends-velox -Pceleborn -Puniffle -DskipTests=true -Dmaven.javadoc.skip=true -Dmaven.scaladoc.skip=true -Dmaven.source.skip -Dcyclonedx.skip=true
           ls -lh package/target/
       - name: Upload bundle package
         uses: actions/upload-artifact@v3
