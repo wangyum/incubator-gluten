@@ -26,7 +26,7 @@ jobs:
           mv ../packages/* $M2_REPOSITORY
           cd $M2_REPOSITORY && find . -name "_*.repositories" | xargs rm -rf # Fix Could not find artifact io.ebay.rheos ...
       - name: Upload bundle package
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: gluten-velox-bundle-package
           path: $M2_REPOSITORY/org/*
