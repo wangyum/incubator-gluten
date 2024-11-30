@@ -2,6 +2,7 @@ name: Build ebay bundle package2
 
 env:
   M2_REPOSITORY: '/root/.m2/repository/'
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 on:
   push:
