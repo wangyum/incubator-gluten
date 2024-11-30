@@ -25,26 +25,10 @@ jobs:
           rm -rf $M2_REPOSITORY/io && rm -rf $M2_REPOSITORY/org
           mv ../packages/* $M2_REPOSITORY
           cd $M2_REPOSITORY && find . -name "_*.repositories" | xargs rm -rf # Fix Could not find artifact io.ebay.rheos ...
-      - uses: actions/checkout@v1
-        with:
-          repository: wangyum/ebay-spark
-          ref: gluten-build
-          token: ${{ secrets.EBAY_TOKEN }}
-      - name: Install ebay-spark to $M2_REPOSITORY
-        run: |
-          cd ../ebay-spark && build/mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true
-      - name: Build Gluten velox third party
-        run: |
-          git clone -b ebay-build2 https://github.com/wangyum/incubator-gluten.git
-          cd incubator-gluten
-          bash dev/ci-velox-buildstatic-centos-7.sh
-          ls -lh ./cpp/build/releases/
-          mvn clean install -Pspark-3.5 -Dhadoop.version=3.3.3 -Pbackends-velox -Pceleborn -Puniffle -DskipTests=true -Dmaven.javadoc.skip=true -Dmaven.scaladoc.skip=true -Dmaven.source.skip -Dcyclonedx.skip=true
-          ls -lh package/target/
       - name: Upload bundle package
         uses: actions/upload-artifact@v3
         with:
           name: gluten-velox-bundle-package
-          path: package/target/gluten-velox-bundle-*.jar
+          path: $M2_REPOSITORY/org/*
           retention-days: 7
           if-no-files-found: error
