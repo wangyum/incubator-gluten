@@ -17,36 +17,25 @@ name: Build eBay bundle package
 
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
-  CCACHE_DIR: "${{ github.workspace }}/.ccache"
   M2_REPOSITORY: '/root/.m2/repository/'
 
 on:
   push:
     branches:
-      - 'ebay-build2'
+      - 'ebay-build'
 
 jobs:
   build-native-lib:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
-      - name: Get Ccache
-        uses: actions/cache/restore@v3
-        with:
-          path: '${{ env.CCACHE_DIR }}'
-          key: ccache-centos7-release-default-${{github.sha}}
-          restore-keys: |
-            ccache-centos7-release-default
       - name: Build Gluten velox third party
         run: |
           docker run -v $GITHUB_WORKSPACE:/work -w /work apache/gluten:vcpkg-centos-7 bash -c "
             df -a
             cd /work
-            export CCACHE_DIR=/work/.ccache
             bash dev/ci-velox-buildstatic-centos-7.sh
-            ccache -s
             mkdir -p /work/.m2/repository/org/apache/arrow/
-            cp -r $M2_REPOSITORY/org/apache/arrow/* /work/.m2/repository/org/apache/arrow/
             cp -r $M2_REPOSITORY/org/apache/arrow  arrow-package
           "
       - name: Upload native libs
