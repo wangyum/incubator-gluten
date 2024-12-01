@@ -57,6 +57,7 @@ jobs:
             ccache -s
             mkdir -p /work/.m2/repository/org/apache/arrow/
             cp -r /root/.m2/repository/org/apache/arrow/* /work/.m2/repository/org/apache/arrow/
+            cp -r /root/.m2/repository/org/apache/arrow  arrow-package
           "
       - name: Upload native libs
         uses: actions/upload-artifact@v3
@@ -67,8 +68,9 @@ jobs:
       - name: Upload Artifact Arrow Jar
         uses: actions/upload-artifact@v3
         with:
-          path: /root/.m2/repository/org/apache/arrow/
+          path: ./arrow-package/
           name: velox-arrow-jar-centos-7-${{github.sha}}
+          if-no-files-found: error
 
   build-bundle-package-centos8:
     needs: build-native-lib
