@@ -79,7 +79,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: velox-arrow-jar-centos-7-${{github.sha}}
-          path: $M2_REPOSITORY/org/apache/arrow/
+          path: /root/.m2/repository/org/apache/arrow/
       - name: Setup java and maven
         run: |
           sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && \
