@@ -21,7 +21,6 @@ import org.apache.gluten.exception.GlutenException
 import org.apache.gluten.execution.{ValidatablePlan, WriteFilesExecTransformer}
 import org.apache.gluten.extension.columnar.transition.{Convention, ConventionReq}
 import org.apache.gluten.extension.columnar.transition.Convention.RowType
-import org.apache.gluten.sql.shims.SparkShimLoader
 
 import org.apache.spark.TaskContext
 import org.apache.spark.internal.io.FileCommitProtocol
