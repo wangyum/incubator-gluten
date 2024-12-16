@@ -386,10 +386,14 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
                   // Convert the viewfs path into hdfs
                   val newPaths = paths.map {
                     viewfsPath =>
-                      val viewPath = new Path(viewfsPath)
-                      val viewFileSystem =
-                        FileSystem.get(viewPath.toUri, serializableHadoopConf.value)
-                      viewFileSystem.resolvePath(viewPath).toString
+                      var hdfsPath = viewfsPath
+                      while (hdfsPath.startsWith("viewfs")) {
+                        val viewPath = new Path(hdfsPath)
+                        val viewFileSystem =
+                          FileSystem.get(viewPath.toUri, serializableHadoopConf.value)
+                        hdfsPath = viewFileSystem.resolvePath(viewPath).toString
+                      }
+                      hdfsPath
                   }
                   splitInfo.setPaths(newPaths.asJava)
                 }
