@@ -199,6 +199,8 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
 ) extends WholeStageTransformerGenerateTreeStringShim
   with UnaryTransformSupport {
 
+  private val fileSystemCache: mutable.Map[String, FileSystem] = mutable.Map.empty
+
   def stageId: Int = transformStageId
 
   def wholeStageTransformerContextDefined: Boolean = wholeStageTransformerContext.isDefined
@@ -377,20 +379,22 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
       val allScanSplitInfos =
         getSplitInfosFromPartitions(basicScanExecTransformers, allScanPartitions)
       if (GlutenConfig.getConf.enableHdfsViewfs) {
+        val start = System.currentTimeMillis()
         allScanSplitInfos.foreach {
           splitInfos =>
             splitInfos.foreach {
               case splitInfo: LocalFilesNode =>
                 val paths = splitInfo.getPaths.asScala
-                if (paths.nonEmpty && paths.exists(_.startsWith("viewfs"))) {
+                if (paths.exists(_.startsWith("viewfs"))) {
                   // Convert the viewfs path into hdfs
                   val newPaths = paths.map {
                     viewfsPath =>
                       var finalPath = viewfsPath
                       while (finalPath.startsWith("viewfs")) {
                         val viewPath = new Path(finalPath)
-                        val viewFileSystem =
-                          FileSystem.get(viewPath.toUri, serializableHadoopConf.value)
+                        val viewFileSystem = fileSystemCache.getOrElseUpdate(
+                          viewPath.toUri.getAuthority,
+                          FileSystem.get(viewPath.toUri, serializableHadoopConf.value))
                         finalPath = viewFileSystem.resolvePath(viewPath).toString
                       }
                       finalPath
@@ -399,6 +403,9 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
                 }
             }
         }
+        logOnLevel(
+          "INFO",
+          s"Convert the viewfs path into hdfs took: ${System.currentTimeMillis() - start} ms.")
       }
 
       val inputPartitions =
