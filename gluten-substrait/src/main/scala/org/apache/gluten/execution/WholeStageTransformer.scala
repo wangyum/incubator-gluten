@@ -356,6 +356,7 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
   override def doExecuteColumnar(): RDD[ColumnarBatch] = {
     assert(child.isInstanceOf[TransformSupport])
     val pipelineTime: SQLMetric = longMetric("pipelineTime")
+    val replaceViewFsPathTime: SQLMetric = longMetric("replaceViewFsPathTime")
     // We should do transform first to make sure all subqueries are materialized
     val wsCtx = GlutenTimeMetric.withMillisTime {
       doWholeStageTransform()
@@ -379,37 +380,36 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
       val allScanSplitInfos =
         getSplitInfosFromPartitions(basicScanExecTransformers, allScanPartitions)
       if (GlutenConfig.getConf.enableHdfsViewfs) {
-        val start = System.currentTimeMillis()
-        val defaultUri = FileSystem.getDefaultUri(serializableHadoopConf.value).toString
-        allScanSplitInfos.foreach {
-          splitInfos =>
-            splitInfos.foreach {
-              case splitInfo: LocalFilesNode =>
-                val paths = splitInfo.getPaths.asScala
-                if (paths.filter(_.startsWith("viewfs")).exists(!_.startsWith(defaultUri))) {
-                  // Convert the viewfs path into hdfs
-                  val newPaths = paths.map {
-                    viewfsPath =>
-                      var finalPath = viewfsPath
-                      while (finalPath.startsWith("viewfs") && !finalPath.startsWith(defaultUri)) {
-                        val pathPrefix = viewfsPath.split("/", 8).take(7).mkString("/")
-                        val hdfsPath = fileSystemCache.getOrElseUpdate(
-                          pathPrefix,
-                          FileSystem
-                            .get(new Path(pathPrefix).toUri, serializableHadoopConf.value)
-                            .resolvePath(new Path(pathPrefix))
-                            .toString)
-                        finalPath = viewfsPath.replace(pathPrefix, hdfsPath)
-                      }
-                      finalPath
-                  }
-                  splitInfo.setPaths(newPaths.asJava)
+        GlutenTimeMetric.millis(replaceViewFsPathTime) {
+          _ =>
+            val start = System.currentTimeMillis()
+            val defaultUri = FileSystem.getDefaultUri(serializableHadoopConf.value).toString
+            allScanSplitInfos.foreach {
+              splitInfos =>
+                splitInfos.foreach {
+                  case splitInfo: LocalFilesNode =>
+                    val newPaths = splitInfo.getPaths.asScala.map {
+                      path =>
+                        if (path.startsWith("viewfs") && !path.startsWith(defaultUri)) {
+                          val pathPrefix = path.split("/", 8).take(7).mkString("/")
+                          val hdfsPath = fileSystemCache.getOrElseUpdate(
+                            pathPrefix,
+                            FileSystem
+                              .get(new Path(pathPrefix).toUri, serializableHadoopConf.value)
+                              .resolvePath(new Path(pathPrefix))
+                              .toString)
+                          path.replace(pathPrefix, hdfsPath)
+                        } else {
+                          path
+                        }
+                    }
+                    splitInfo.setPaths(newPaths.asJava)
                 }
             }
+            logOnLevel(
+              "INFO",
+              s"Convert the viewfs path into hdfs took: ${System.currentTimeMillis() - start} ms.")
         }
-        logOnLevel(
-          "INFO",
-          s"Convert the viewfs path into hdfs took: ${System.currentTimeMillis() - start} ms.")
       }
 
       val inputPartitions =
