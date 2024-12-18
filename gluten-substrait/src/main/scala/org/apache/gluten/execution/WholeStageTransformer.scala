@@ -199,7 +199,7 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
 ) extends WholeStageTransformerGenerateTreeStringShim
   with UnaryTransformSupport {
 
-  private val fileSystemCache: mutable.Map[String, FileSystem] = mutable.Map.empty
+  private val fileSystemCache: mutable.Map[String, String] = mutable.Map.empty
 
   def stageId: Int = transformStageId
 
@@ -380,22 +380,26 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
         getSplitInfosFromPartitions(basicScanExecTransformers, allScanPartitions)
       if (GlutenConfig.getConf.enableHdfsViewfs) {
         val start = System.currentTimeMillis()
+        val defaultUri = FileSystem.getDefaultUri(serializableHadoopConf.value).toString
         allScanSplitInfos.foreach {
           splitInfos =>
             splitInfos.foreach {
               case splitInfo: LocalFilesNode =>
                 val paths = splitInfo.getPaths.asScala
-                if (paths.exists(_.startsWith("viewfs"))) {
+                if (paths.filter(_.startsWith("viewfs")).exists(!_.startsWith(defaultUri))) {
                   // Convert the viewfs path into hdfs
                   val newPaths = paths.map {
                     viewfsPath =>
                       var finalPath = viewfsPath
-                      while (finalPath.startsWith("viewfs")) {
-                        val viewPath = new Path(finalPath)
-                        val viewFileSystem = fileSystemCache.getOrElseUpdate(
-                          viewPath.toUri.getAuthority,
-                          FileSystem.get(viewPath.toUri, serializableHadoopConf.value))
-                        finalPath = viewFileSystem.resolvePath(viewPath).toString
+                      while (finalPath.startsWith("viewfs") && !finalPath.startsWith(defaultUri)) {
+                        val pathPrefix = viewfsPath.split("/", 8).take(7).mkString("/")
+                        val hdfsPath = fileSystemCache.getOrElseUpdate(
+                          pathPrefix,
+                          FileSystem
+                            .get(new Path(pathPrefix).toUri, serializableHadoopConf.value)
+                            .resolvePath(new Path(pathPrefix))
+                            .toString)
+                        finalPath = viewfsPath.replace(pathPrefix, hdfsPath)
                       }
                       finalPath
                   }
