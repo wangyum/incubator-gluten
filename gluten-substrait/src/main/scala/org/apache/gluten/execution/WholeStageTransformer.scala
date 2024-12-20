@@ -391,7 +391,8 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
                     val newPaths = splitInfo.getPaths.asScala.map {
                       path =>
                         if (path.startsWith("viewfs")) {
-                          val pathPrefix = path.split("/", 8).take(7).mkString("/")
+                          val pathSplit = path.split("/", 8)
+                          val pathPrefix = pathSplit.take(pathSplit.size - 1).mkString("/")
                           val hdfsPath = fileSystemCache.getOrElseUpdate(
                             pathPrefix,
                             FileSystem
