@@ -384,12 +384,14 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
           _ =>
             val start = System.currentTimeMillis()
             val defaultUri = FileSystem.getDefaultUri(serializableHadoopConf.value).toString
+            var lastPath = ""
             allScanSplitInfos.foreach {
               splitInfos =>
                 splitInfos.foreach {
                   case splitInfo: LocalFilesNode =>
                     val newPaths = splitInfo.getPaths.asScala.map {
                       path =>
+                        lastPath = path
                         if (path.startsWith("viewfs")) {
                           val pathSplit = path.split("/", 8)
                           val pathPrefix = pathSplit.take(pathSplit.size - 1).mkString("/")
@@ -409,7 +411,8 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
             }
             logOnLevel(
               "INFO",
-              s"Convert the viewfs path into hdfs took: ${System.currentTimeMillis() - start} ms.")
+              s"Convert the viewfs path into hdfs took: ${System.currentTimeMillis() - start} ms." +
+                s"${lastPath}")
         }
       }
 
