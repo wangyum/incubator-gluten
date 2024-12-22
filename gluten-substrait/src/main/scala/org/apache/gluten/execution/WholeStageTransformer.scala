@@ -412,7 +412,7 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
             logOnLevel(
               "INFO",
               s"Convert the viewfs path into hdfs took: ${System.currentTimeMillis() - start} ms." +
-                s"${lastPath}")
+                s"$lastPath")
         }
       }
 
