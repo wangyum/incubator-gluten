@@ -343,7 +343,7 @@
 	    <delta.binary.version>32</delta.binary.version>
 	    <hudi.version>0.15.0</hudi.version>
         <fasterxml.version>2.15.1</fasterxml.version>
-        <hadoop.version>3.3.4</hadoop.version>
+        <hadoop.version>3.3.3.1.0.39</hadoop.version>
         <antlr4.version>4.9.3</antlr4.version>
       </properties>
       <dependencies>
