@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@v1
         with:
           repository: wangyum/packages
-          ref: main
+          ref: master
           token: ${{ secrets.EBAY_TOKEN }}
       - name: Install packages to $M2_REPOSITORY
         run: |
