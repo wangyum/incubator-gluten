@@ -199,8 +199,6 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
 ) extends WholeStageTransformerGenerateTreeStringShim
   with UnaryTransformSupport {
 
-  private val fileSystemCache: mutable.Map[String, String] = mutable.Map.empty
-
   def stageId: Int = transformStageId
 
   def wholeStageTransformerContextDefined: Boolean = wholeStageTransformerContext.isDefined
@@ -383,7 +381,7 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
         GlutenTimeMetric.millis(replaceViewFsPathTime) {
           _ =>
             val start = System.currentTimeMillis()
-            val defaultUri = FileSystem.getDefaultUri(serializableHadoopConf.value).toString
+            val viewfsToHdfsCache: mutable.Map[String, String] = mutable.Map.empty
             var lastPath = ""
             allScanSplitInfos.foreach {
               splitInfos =>
@@ -393,9 +391,10 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
                       path =>
                         lastPath = path
                         if (path.startsWith("viewfs")) {
-                          val pathSplit = path.split("/", 8)
-                          val pathPrefix = pathSplit.take(pathSplit.size - 1).mkString("/")
-                          val hdfsPath = fileSystemCache.getOrElseUpdate(
+                          val pathSplit = path.split(Path.SEPARATOR, 8)
+                          val pathPrefix =
+                            pathSplit.take(pathSplit.size - 1).mkString(Path.SEPARATOR)
+                          val hdfsPath = viewfsToHdfsCache.getOrElseUpdate(
                             pathPrefix,
                             FileSystem
                               .get(new Path(pathPrefix).toUri, serializableHadoopConf.value)
