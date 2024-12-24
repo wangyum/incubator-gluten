@@ -399,7 +399,8 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
                             FileSystem
                               .get(new Path(pathPrefix).toUri, serializableHadoopConf.value)
                               .fastResolvePath(pathPrefix))
-                          path.replace(pathPrefix, hdfsPath)
+                          hdfsPath + Path.SEPARATOR +
+                            pathSplit.drop(pathSplit.size - 1).mkString(Path.SEPARATOR)
                         } else {
                           path
                         }

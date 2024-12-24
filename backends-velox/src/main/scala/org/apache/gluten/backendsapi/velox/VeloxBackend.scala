@@ -122,7 +122,8 @@ object VeloxBackendSettings extends BackendSettingsApi {
                   FileSystem
                     .get(new Path(pathPrefix).toUri, serializableHadoopConf.get.value)
                     .fastResolvePath(pathPrefix))
-                viewfsPath.replace(pathPrefix, hdfsPath)
+                hdfsPath + Path.SEPARATOR +
+                  pathSplit.drop(pathSplit.size - 1).mkString(Path.SEPARATOR)
             }
           } else {
             filteredRootPaths
