@@ -393,14 +393,14 @@ case class WholeStageTransformer(child: SparkPlan, materializeInput: Boolean = f
                         lastPath = path
                         if (path.startsWith("viewfs")) {
                           val pathSplit = path.split(Path.SEPARATOR)
-                          val pathPrefix =
-                            pathSplit.take(pathSplit.size - 1).mkString(Path.SEPARATOR)
+                          val prefixIndex = pathSplit.size - 1
+                          val pathPrefix = pathSplit.take(prefixIndex).mkString(Path.SEPARATOR)
                           val hdfsPath = viewfsToHdfsCache.getOrElseUpdate(
                             pathPrefix,
                             ViewFileSystemUtils
-                              .fastResolvePath(pathPrefix, serializableHadoopConf.value))
+                              .convertViewfsToHdfs(pathPrefix, serializableHadoopConf.value))
                           hdfsPath + Path.SEPARATOR +
-                            pathSplit.drop(pathSplit.size - 1).mkString(Path.SEPARATOR)
+                            pathSplit.drop(prefixIndex).mkString(Path.SEPARATOR)
                         } else {
                           path
                         }

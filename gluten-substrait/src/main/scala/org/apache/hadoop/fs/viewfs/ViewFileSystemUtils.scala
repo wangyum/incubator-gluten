@@ -21,7 +21,7 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 
 object ViewFileSystemUtils {
   // Convert the viewfs path to hdfs path using a fast way to avoid rpc calls.
-  def fastResolvePath(f: String, hadoopConfig: Configuration): String = {
+  def convertViewfsToHdfs(f: String, hadoopConfig: Configuration): String = {
     val path = new Path(f)
     FileSystem.get(path.toUri, hadoopConfig) match {
       case vfs: ViewFileSystem =>
