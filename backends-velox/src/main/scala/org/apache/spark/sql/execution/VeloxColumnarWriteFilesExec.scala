@@ -154,7 +154,7 @@ class VeloxColumnarWriteFilesRDD(
     } else {
       Some(
         WriteTaskResult(
-          new TaskCommitMessage(addedAbsPathFiles.toMap -> updatedPartitions),
+          new TaskCommitMessage(addedAbsPathFiles.toMap, updatedPartitions, numFiles),
           summary))
     }
   }
