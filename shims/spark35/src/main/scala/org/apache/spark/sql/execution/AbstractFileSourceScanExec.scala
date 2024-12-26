@@ -264,11 +264,11 @@ abstract class AbstractFileSourceScanExec(
         partition =>
           partition.files.flatMap {
             file =>
-              if (shouldProcess(file.getPath)) {
+              if (shouldProcess(file.path)) {
                 val isSplitable = relation.fileFormat.isSplitable(
                   relation.sparkSession,
                   relation.options,
-                  file.getPath)
+                  file.path)
                 PartitionedFileUtil.splitFiles(
                   sparkSession = relation.sparkSession,
                   file = file,
