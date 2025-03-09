@@ -1,0 +1,21 @@
+<settings>
+    <servers>
+        <server>
+            <id>github</id>
+            <username>wangyum</username>
+            <password>${env.OAUTH_KEY}</password>
+        </server>
+    </servers>
+<!--    <mirrors>-->
+<!--        <mirror>-->
+<!--            <id>central</id>-->
+<!--            <mirrorOf>*</mirrorOf>-->
+<!--            <url>http://repo.maven.apache.org/maven2</url>-->
+<!--        </mirror>-->
+<!--        <mirror>-->
+<!--            <id>eclipse</id>-->
+<!--            <mirrorOf>*</mirrorOf>-->
+<!--            <url>https://repo.eclipse.org/content/groups/releases</url>-->
+<!--        </mirror>-->
+<!--    </mirrors>-->
+</settings>
