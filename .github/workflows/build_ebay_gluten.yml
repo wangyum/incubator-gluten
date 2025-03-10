@@ -105,9 +105,10 @@ jobs:
           cd $GITHUB_WORKSPACE/ && \
           export MAVEN_HOME=/usr/lib/maven && \
           export PATH=${PATH}:${MAVEN_HOME}/bin && \
-          mvn clean deploy -Pspark-3.5 -Pgithub-deploy -Dhadoop.version=3.3.3.1.0.39 -Pbackends-velox -Pceleborn -Puniffle -DskipTests=true -Dmaven.javadoc.skip=true -Dmaven.scaladoc.skip=true -Dmaven.source.skip -Dcyclonedx.skip=true -s .github/settings.xml
+          mvn clean install -Pspark-3.5 -Pgithub-deploy -Dhadoop.version=3.3.3.1.0.39 -Pbackends-velox -Pceleborn -Puniffle -DskipTests=true -Dmaven.javadoc.skip=true -Dmaven.scaladoc.skip=true -Dmaven.source.skip -Dcyclonedx.skip=true -s .github/settings.xml
           ls -lh package/target/
           ls -lh /root/.m2/repository/org/apache/gluten/package/
+          mvn clean deploy -Pspark-3.5 -Pgithub-deploy -pl package -Dhadoop.version=3.3.3.1.0.39 -Pbackends-velox -Pceleborn -Puniffle -DskipTests=true -Dmaven.javadoc.skip=true -Dmaven.scaladoc.skip=true -Dmaven.source.skip -Dcyclonedx.skip=true -s .github/settings.xml
       - name: Upload bundle package
         uses: actions/upload-artifact@v4
         with:
