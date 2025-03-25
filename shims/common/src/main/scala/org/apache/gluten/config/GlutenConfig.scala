@@ -1662,7 +1662,7 @@ object GlutenConfig {
       .internal()
       .doc("If enabled, gluten will convert the viewfs path to hdfs path in scala side")
       .booleanConf
-      .createWithDefault(false)
+      .createWithDefault(true)
 
   val ENCRYPTED_PARQUET_FALLBACK_ENABLED =
     buildConf("spark.gluten.sql.fallbackEncryptedParquet")
