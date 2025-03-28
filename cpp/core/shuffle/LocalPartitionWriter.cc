@@ -387,7 +387,8 @@ std::string LocalPartitionWriter::nextSpilledFileDir() {
 
 arrow::Result<std::shared_ptr<arrow::io::OutputStream>> LocalPartitionWriter::openFile(const std::string& file) {
   std::shared_ptr<arrow::io::FileOutputStream> fout;
-  auto fd = open(file.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  auto fd = open(file.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
+  fchmod(fd, 0644);
   ARROW_ASSIGN_OR_RAISE(fout, arrow::io::FileOutputStream::Open(fd));
   if (options_.bufferedWrite) {
     // The `shuffleFileBufferSize` bytes is a temporary allocation and will be freed with file close.
