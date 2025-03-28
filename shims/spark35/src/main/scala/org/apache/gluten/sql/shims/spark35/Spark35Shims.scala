@@ -409,7 +409,7 @@ class Spark35Shims extends SparkShims {
 
   def splitFiles(
       sparkSession: SparkSession,
-      file: FileStatusWithMetadata,
+      file: FileStatus,
       filePath: Path,
       isSplitable: Boolean,
       maxSplitBytes: Long,
@@ -417,7 +417,7 @@ class Spark35Shims extends SparkShims {
       metadata: Map[String, Any] = Map.empty): Seq[PartitionedFile] = {
     PartitionedFileUtil.splitFiles(
       sparkSession,
-      file,
+      FileStatusWithMetadata(file, metadata),
       isSplitable,
       maxSplitBytes,
       partitionValues)
