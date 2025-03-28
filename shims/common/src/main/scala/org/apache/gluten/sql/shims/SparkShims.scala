@@ -217,7 +217,7 @@ trait SparkShims {
 
   def splitFiles(
       sparkSession: SparkSession,
-      file: FileStatusWithMetadata,
+      file: FileStatus,
       filePath: Path,
       isSplitable: Boolean,
       maxSplitBytes: Long,
