@@ -192,12 +192,6 @@
               </relocations>
               <filters>
                 <filter>
-                  <artifact>com.google.code.findbugs:jsr305</artifact>
-                  <excludes>
-                    <exclude>**</exclude>
-                  </excludes>
-                </filter>
-                <filter>
                   <artifact>*:*</artifact>
                   <excludes>
                     <exclude>META-INF/*.SF</exclude>
@@ -210,15 +204,13 @@
                     <exclude>NOTICE.txt</exclude>
                   </excludes>
                 </filter>
+                <filter>
+                  <artifact>com.google.code.findbugs:jsr305</artifact>
+                  <excludes>
+                    <exclude>**/*.java</exclude>
+                  </excludes>
+                </filter>
               </filters>
-              <artifactSet>
-                <includes>
-                  <include>*:*</include>
-                </includes>
-                <excludes>
-                  <exclude>javax.annotation:*</exclude>
-                </excludes>
-              </artifactSet>
             </configuration>
           </execution>
         </executions>
