@@ -423,7 +423,7 @@ class Spark35Shims extends SparkShims {
 
   def splitFiles(
       sparkSession: SparkSession,
-      file: FileStatusWithMetadata,
+      file: FileStatus,
       filePath: Path,
       isSplitable: Boolean,
       maxSplitBytes: Long,
@@ -431,7 +431,7 @@ class Spark35Shims extends SparkShims {
       metadata: Map[String, Any] = Map.empty): Seq[PartitionedFile] = {
     PartitionedFileUtil.splitFiles(
       sparkSession,
-      file,
+      FileStatusWithMetadata(file, metadata),
       isSplitable,
       maxSplitBytes,
       partitionValues)
@@ -488,9 +488,11 @@ class Spark35Shims extends SparkShims {
                   "is enabled"
               )
 
-              val groupedPartitions = batchScan
-                .groupPartitions(finalPartitions.map(_.head), true)
-                .getOrElse(Seq.empty)
+              val groupedPartitions = filteredPartitions.map(
+                splits => {
+                  assert(splits.nonEmpty && splits.head.isInstanceOf[HasPartitionKey])
+                  (splits.head.asInstanceOf[HasPartitionKey].partitionKey(), splits)
+                })
 
               // This means the input partitions are not grouped by partition values. We'll need to
               // check `groupByPartitionValues` and decide whether to group and replicate splits
