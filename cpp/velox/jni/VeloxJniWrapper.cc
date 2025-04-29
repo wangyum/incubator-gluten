@@ -521,7 +521,7 @@ JNIEXPORT jlong JNICALL Java_org_apache_gluten_vectorized_HashJoinBuilder_native
       cb,
       defaultLeafVeloxMemoryPool());
   auto id = gluten::hashTableObjStore->save(hashTableHandler);
-  std::cout << "store the hashTableBuilder is " << hashTableHandler.get() << " and the store id is " << id << "\n";
+  std::cout << "store the hashTableBuilder is " << hashTableHandler.get() << " and the store id is " << (jlong)id << "\n";
   std::cout.setf(std::ios::unitbuf);
   return id;
   JNI_METHOD_END(kInvalidObjectHandle)

@@ -57,7 +57,7 @@ object VeloxBroadcastBuildSideCache
 
   def getOrBuildBroadcastHashTable(
       broadcast: Broadcast[BuildSideRelation],
-      broadCastContext: BroadcastHashJoinContext): BroadcastHashTable = {
+      broadCastContext: BroadcastHashJoinContext): BroadcastHashTable = synchronized {
 
     buildSideRelationCache
       .get(
@@ -78,11 +78,13 @@ object VeloxBroadcastBuildSideCache
 
   /** This is callback from c++ backend. */
   def get(broadcastHashtableId: String): Long =
-    Option(buildSideRelationCache.getIfPresent(broadcastHashtableId))
-      .map(_.pointer)
-      .getOrElse(0)
+    synchronized {
+      Option(buildSideRelationCache.getIfPresent(broadcastHashtableId))
+        .map(_.pointer)
+        .getOrElse(0)
+    }
 
-  def invalidateBroadcastHashtable(broadcastHashtableId: String): Unit = {
+  def invalidateBroadcastHashtable(broadcastHashtableId: String): Unit = synchronized {
     // Cleanup operations on the backend are idempotent.
     buildSideRelationCache.invalidate(broadcastHashtableId)
   }
