@@ -70,7 +70,7 @@ object VeloxBroadcastBuildSideCache
               unsafe.buildHashTable(broadCastContext)
           }
 
-          logDebug(s"Create bhj $broadcast_id = 0x${pointer.toHexString}")
+          logWarning(s"Create bhj $broadcast_id = $pointer")
           BroadcastHashTable(pointer, relation)
         }
       )
@@ -94,7 +94,7 @@ object VeloxBroadcastBuildSideCache
 
   override def onRemoval(key: String, value: BroadcastHashTable, cause: RemovalCause): Unit = {
     synchronized {
-      logDebug(s"Remove bhj $key = 0x${value.pointer.toHexString}")
+      logWarning(s"Remove bhj $key = ${value.pointer}")
       if (value.relation != null) {
         value.relation match {
           case columnar: ColumnarBuildSideRelation =>
