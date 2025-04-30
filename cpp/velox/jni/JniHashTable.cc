@@ -113,6 +113,7 @@ std::shared_ptr<facebook::velox::exec::HashTableBuilder> nativeHashTableBuild(
 
   for (auto i = 0; i < batches.size(); i++) {
     auto rowVector = VeloxColumnarBatch::from(memoryPool.get(), batches[i])->getRowVector();
+    std::cout << "the hash table rowVector is " << rowVector->toString(0, rowVector->size()) << "\n";
     hashTableBuilder->addInput(rowVector);
   }
   return hashTableBuilder;
