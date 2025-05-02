@@ -22,6 +22,7 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.expressions.Attribute
 import org.apache.spark.sql.connector.read.InputPartition
 import org.apache.spark.sql.execution.datasources.{BucketingUtils, FilePartition, HadoopFsRelation, PartitionDirectory}
+import org.apache.spark.sql.execution.datasources.FilePartition.{maxSplitBytesBySpecifiedNum, minPartitionNumBySpecifiedSize}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.util.collection.BitSet
 
@@ -47,9 +48,30 @@ case class InputPartitionsUtil(
   }
 
   private def genNonBuckedInputPartitionSeq(): Seq[InputPartition] = {
+    val originSize = FilePartition.maxSplitBytes(relation.sparkSession, selectedPartitions)
     val openCostInBytes = relation.sparkSession.sessionState.conf.filesOpenCostInBytes
     val maxSplitBytes =
-      FilePartition.maxSplitBytes(relation.sparkSession, selectedPartitions)
+      if (
+        relation.sparkSession.sessionState.conf.bucketingEnabled &&
+        relation.bucketSpec.isDefined
+      ) {
+        val partitionNum =
+          minPartitionNumBySpecifiedSize(relation.sparkSession, selectedPartitions, originSize)
+        val bucketNum = math.max(
+          relation.bucketSpec.get.numBuckets,
+          relation.sparkSession.sessionState.conf.numShufflePartitions)
+        val maxBucketScanParts = relation.sparkSession.sessionState.conf.filesMaxPartitionNum
+          .map(_.min(bucketNum))
+          .getOrElse(bucketNum)
+        if (partitionNum > maxBucketScanParts) {
+          maxSplitBytesBySpecifiedNum(relation.sparkSession, selectedPartitions, maxBucketScanParts)
+        } else {
+          originSize
+        }
+      } else {
+        originSize
+      }
+
     logInfo(
       s"Planning scan with bin packing, max size: $maxSplitBytes bytes, " +
         s"open cost is considered as scanning $openCostInBytes bytes.")
