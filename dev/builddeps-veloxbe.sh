@@ -276,6 +276,7 @@ source $GLUTEN_DIR/dev/build_helper_functions.sh
 if [ -z "${GLUTEN_VCPKG_ENABLED:-}" ] && [ $RUN_SETUP_SCRIPT == "ON" ]; then
   echo "Start to install dependencies"
   pushd $VELOX_HOME
+  sed -i '' 's/-DBUILD_TESTING=OFF/-DBUILD_TESTING=OFF \\\n    -DCMAKE_POLICY_VERSION_MINIMUM=3.5/g' $VELOX_HOME/scripts/setup-helper-functions.sh
   if [ $OS == 'Linux' ]; then
     setup_linux
   elif [ $OS == 'Darwin' ]; then
