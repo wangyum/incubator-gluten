@@ -28,7 +28,7 @@ on:
 
 jobs:
   build-native-lib:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       OAUTH_KEY: ${{ secrets.OAUTH_KEY }}
     steps:
@@ -59,7 +59,7 @@ jobs:
 
   build-bundle-package-centos8:
     needs: build-native-lib
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       OAUTH_KEY: ${{ secrets.OAUTH_KEY }}
     container: centos:8
