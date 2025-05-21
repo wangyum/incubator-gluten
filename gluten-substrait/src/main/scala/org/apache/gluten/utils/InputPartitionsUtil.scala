@@ -54,7 +54,7 @@ case class InputPartitionsUtil(
     val maxSplitBytes =
       if (
         relation.sparkSession.sessionState.conf.bucketingEnabled &&
-          relation.bucketSpec.isDefined
+        relation.bucketSpec.isDefined
       ) {
         val partitionNum =
           minPartitionNumBySpecifiedSize(relation.sparkSession, selectedPartitions, originSize)
