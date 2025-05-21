@@ -22,7 +22,9 @@ env:
 on:
   push:
     branches:
-      - 'ebay-build'
+      - 'ebay-build**'
+    tags:
+      - 'ebay-build**'
 
 jobs:
   build-native-lib:
@@ -100,7 +102,7 @@ jobs:
       - name: Install ebay-spark to $M2_REPOSITORY
         run: |
           cd ../ebay-spark && build/mvn clean install -Dhadoop.version=3.3.3.1.0.39 -DskipTests=true -Dmaven.javadoc.skip=true
-      - name: Build for ebay Spark 3.5
+      - name: Build for eBay Spark 3.5
         run: |
           cd $GITHUB_WORKSPACE/ && \
           export MAVEN_HOME=/usr/lib/maven && \
